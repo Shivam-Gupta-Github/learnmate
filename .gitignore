@@ -1,0 +1,20 @@
+# Ignore dependencies
+**/node_modules/
+
+# Ignore env files everywhere
+**/.env
+backend/.env
+
+# Ignore build outputs
+**/dist/
+**/build/
+
+# OS / IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local databases / cache
+chroma_db/
+files/
