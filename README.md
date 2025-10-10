@@ -15,7 +15,6 @@ learnmate/
 │   │   ├── services/
 │   │   ├── utils/
 │   │   └── server.js
-│   ├── files/      # store PDFs or uploaded files
 │   ├── chroma_db/  # local Chroma DB storage
 │   ├── package.json
 │   └── .env
