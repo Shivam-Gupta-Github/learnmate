@@ -7,7 +7,7 @@ const model = new ChatOllama({
   temperature: 0,
 });
 
-const embeddings = new OllamaEmbeddings({ model: "deepseek-r1:1.5b" });
+const embeddings = new OllamaEmbeddings({ model: "llama3.1:8b" });
 
 export async function askQuestion(query, collectionName) {
   const chroma = await Chroma.fromExistingCollection(embeddings, {
@@ -22,10 +22,15 @@ export async function askQuestion(query, collectionName) {
   const context = docs.map((d) => d.pageContent).join("\n\n");
 
   const messages = [
-    { role: "system", content: "You are a helpful assistant." },
+    {
+      role: "system",
+      content: `You are a knowledgeable assistant that gives detailed, well-structured answers. 
+      If the provided context is relevant, use it to answer the question clearly and comprehensively.
+      If the context is insufficient or unrelated, explicitly say that your answer is based on general knowledge, not the provided documents.`,
+    },
     {
       role: "user",
-      content: `Answer the following question using context only:\n${context}\n\nQ: ${query}`,
+      content: `Context:\n${context}\n\nQuestion: ${query}\n\nNow provide a clear and informative answer.`,
     },
   ];
 

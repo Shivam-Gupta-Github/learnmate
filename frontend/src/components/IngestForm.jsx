@@ -1,108 +1,94 @@
 import React, { useState } from "react";
-import axios from "axios";
+import { Upload, Loader2 } from "lucide-react";
 
-const IngestForm = () => {
-  const [type, setType] = useState("pdf"); // default type
-  const [filePath, setFilePath] = useState(""); // for PDF
-  const [url, setUrl] = useState(""); // for YouTube
-  const [loading, setLoading] = useState(false);
+export default function IngestForm({
+  ingestType,
+  setIngestResult,
+  loading,
+  setLoading,
+}) {
+  const [pdfPath, setPdfPath] = useState("");
+  const [youtubeUrl, setYoutubeUrl] = useState("");
+  const [collection, setCollection] = useState("");
+  const API_BASE = import.meta.env.VITE_BACKEND_URL;
 
-  const handleTypeChange = (e) => {
-    const selectedType = e.target.value;
-    setType(selectedType);
-    setFilePath("");
-    setUrl("");
-  };
-
-  const handleSubmit = async () => {
-    if (type === "pdf" && !filePath.trim())
-      return alert("Please enter the PDF file path.");
-    if (type === "youtube" && !url.trim())
-      return alert("Please enter a YouTube URL.");
-
-    const payload = {
-      type,
-      collection: null, // backend will use default
-    };
-
-    if (type === "pdf") payload.filePath = filePath.trim();
-    if (type === "youtube") payload.url = url.trim();
+  const handleIngest = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setIngestResult(null);
 
     try {
-      setLoading(true);
-      const res = await axios.post("http://localhost:5000/api/ingest", payload);
-      alert(
-        `Ingested successfully!\nType-specific collection: ${res.data.ingestedCollection}\nGlobal collection: ${res.data.globalCollection}`
-      );
+      const payload = { type: ingestType, collection: collection || undefined };
+      if (ingestType === "youtube") payload.url = youtubeUrl;
+      else payload.filePath = pdfPath;
 
-      // Reset inputs
-      setFilePath("");
-      setUrl("");
-    } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.error || "Server error");
+      const response = await fetch(`${API_BASE}/ingest`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setIngestResult({ success: true, data });
+        setPdfPath("");
+        setYoutubeUrl("");
+        setCollection("");
+      } else setIngestResult({ success: false, error: data.error });
+    } catch (error) {
+      setIngestResult({ success: false, error: error.message });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-lg mx-auto mt-10 p-6 bg-white shadow rounded">
-      <h2 className="text-2xl font-semibold mb-4 text-center">
-        Ingest Content
-      </h2>
-
-      {/* Type Selector */}
-      <div className="mb-4">
-        <label className="mr-2 font-medium">Content Type:</label>
-        <select
-          value={type}
-          onChange={handleTypeChange}
-          className="border rounded px-3 py-2 w-full"
-        >
-          <option value="pdf">PDF</option>
-          <option value="youtube">YouTube</option>
-        </select>
-      </div>
-
-      {/* PDF File Path Input */}
-      {type === "pdf" && (
-        <div className="mb-4">
-          <input
-            type="text"
-            placeholder="Enter file path (e.g., files/resume.pdf)"
-            value={filePath}
-            onChange={(e) => setFilePath(e.target.value)}
-            className="border rounded w-full px-3 py-2"
-          />
-        </div>
+    <form onSubmit={handleIngest} className="space-y-4">
+      {ingestType === "pdf" ? (
+        <input
+          type="text"
+          value={pdfPath}
+          onChange={(e) => setPdfPath(e.target.value)}
+          placeholder="/path/to/document.pdf"
+          className="w-full px-4 py-3 bg-slate-700 text-white rounded-lg border border-slate-600 focus:border-purple-500 focus:outline-none"
+          required
+        />
+      ) : (
+        <input
+          type="url"
+          value={youtubeUrl}
+          onChange={(e) => setYoutubeUrl(e.target.value)}
+          placeholder="https://www.youtube.com/watch?v=..."
+          className="w-full px-4 py-3 bg-slate-700 text-white rounded-lg border border-slate-600 focus:border-purple-500 focus:outline-none"
+          required
+        />
       )}
 
-      {/* YouTube URL Input */}
-      {type === "youtube" && (
-        <div className="mb-4">
-          <input
-            type="text"
-            placeholder="Enter YouTube URL"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            className="border rounded w-full px-3 py-2"
-          />
-        </div>
-      )}
+      <input
+        type="text"
+        value={collection}
+        onChange={(e) => setCollection(e.target.value)}
+        placeholder="Collection (optional)"
+        className="w-full px-4 py-3 bg-slate-700 text-white rounded-lg border border-slate-600 focus:border-purple-500 focus:outline-none"
+      />
 
-      {/* Submit Button */}
       <button
-        onClick={handleSubmit}
+        type="submit"
         disabled={loading}
-        className={`w-full ${
-          loading ? "bg-gray-400" : "bg-blue-500 hover:bg-blue-600"
-        } text-white px-4 py-2 rounded transition`}
+        className="w-full py-3 px-6 bg-purple-600 hover:bg-purple-700 disabled:bg-slate-600 text-white font-semibold rounded-lg transition-all shadow-lg"
       >
-        {loading ? "Processing..." : "Ingest"}
+        {loading ? (
+          <>
+            <Loader2 className="inline mr-2 w-5 h-5 animate-spin" />{" "}
+            Ingesting...
+          </>
+        ) : (
+          <>
+            <Upload className="inline mr-2 w-5 h-5" /> Ingest Data
+          </>
+        )}
       </button>
-    </div>
+    </form>
   );
-};
-
-export default IngestForm;
+}

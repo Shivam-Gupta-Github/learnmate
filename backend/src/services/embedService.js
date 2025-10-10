@@ -5,7 +5,7 @@ import { Chroma } from "@langchain/community/vectorstores/chroma";
 import { splitter } from "../utils/splitter.js";
 
 const embeddings = new OllamaEmbeddings({
-  model: "deepseek-r1:1.5b",
+  model: "llama3.1:8b",
 });
 
 function cleanMetadata(metadata) {

@@ -13,6 +13,7 @@
   "dependencies": {
     "@langchain/community": "^0.3.57",
     "@langchain/core": "^0.3.78",
+    "@langchain/langgraph": "^0.4.9",
     "@langchain/ollama": "^0.2.4",
     "@langchain/openai": "^0.6.14",
     "body-parser": "^2.2.0",
@@ -21,7 +22,11 @@
     "dotenv": "^16.4.5",
     "express": "^5.1.0",
     "langchain": "^0.3.35",
+    "marked": "^16.3.0",
+    "mongoose": "^8.19.1",
     "pdf-parse": "^1.1.1",
-    "youtubei.js": "^15.1.1"
+    "puppeteer": "^24.23.0",
+    "youtubei.js": "^15.1.1",
+    "zod": "^3.25.76"
   }
 }

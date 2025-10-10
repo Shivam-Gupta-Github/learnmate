@@ -18,3 +18,4 @@ Thumbs.db
 # Local databases / cache
 chroma_db/
 files/
+test/
